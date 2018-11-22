@@ -1,4 +1,3 @@
-#Inbound SMS template
 frameworkVersion: ">=1.0.0 <2.0.0"
 
 service: receive-inbound-sms
@@ -12,7 +11,8 @@ provider:
       Action:
         - dynamoDB:*
       Resource:
-        - "arn:aws:dynamodb:us-west-2:977032200496:table/inbound-sms" #Amazon Resource name (ARN) of DynamoDB table
+        - "arn:aws:dynamodb:us-west-2:977032200496:table/inbound-sms"
+        - "arn:aws:dynamodb:us-west-2:977032200496:table/outbound-sms"
 functions:
   ReceiveInboundSMS:
     handler: handler.receive_inbound_sms
