@@ -1,0 +1,20 @@
+#Inbound SMS template
+frameworkVersion: ">=1.0.0 <2.0.0"
+
+service: receive-inbound-sms
+provider:
+  name: aws
+  runtime: python3.6
+  stage: dev
+  region: us-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamoDB:*
+      Resource:
+        - "arn:aws:dynamodb:us-west-2:977032200496:table/inbound-sms" #Amazon Resource name (ARN) of DynamoDB table
+functions:
+  ReceiveInboundSMS:
+    handler: handler.receive_inbound_sms
+    events:
+      - http: POST receive_inbound_sms
