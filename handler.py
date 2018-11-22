@@ -1,8 +1,8 @@
 import json
+import time
 import boto3
 from botocore.vendored import requests
 import config
-import time
 
 
 MY_DYNAMODB = boto3.resource('dynamodb', region_name='us-west-2')
@@ -63,7 +63,7 @@ def log_inbound_sms(event, forward=True):
 
         # sent outbound sms
         forward_message = requests.post(url=send_url, auth=auth, json=body,
-                      headers=headers)
+                                        headers=headers)
         time.sleep(3)
         forward_response = forward_message.json()
         log_outbound_sms(forward_response)
@@ -124,13 +124,5 @@ def receive_inbound_sms(event, context):
     print("called")
     print(event)
     event_body = json.loads(event['body'])
-    #event_body = event['body']
-    # sms = event
-
-    #if 'delivery_receipts' in event_body['data']['attributes']:
-    #    response = log_outbound_dlr(event_body)
-    #elif event_body['data']['attributes']['direction'] == "inbound":
     response = log_inbound_sms(event_body, forward=True)
-    #else:
-    #    response = log_outbound_sms(event_body)
     return response
