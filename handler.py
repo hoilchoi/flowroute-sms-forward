@@ -50,12 +50,11 @@ def log_inbound_sms(event, forward=True):
         send_url = config.SMS_URL
         headers = {'content-type': 'application/json'}
         auth = (config.API_KEY, config.API_SECRET)
-        message_body = ("""FORWARDED MESSAGE
-                        Original Sender: {}
-                        Original Receiver: {}
-                        {}"""
-                        .format(from_number, to_number, message_body))
-        to_number = "12532735442"
+        message_body = ("FORWARDED MESSAGE\n"
+                        "Original From: {}\n"
+                        "Original To: {}\n"
+                        "Body: {}").format(from_number, to_number, message_body)
+        to_number = config.FORWARD_NUMBER
         body = {"to": to_number,
                 "from": config.FROM_NUMBER,
                 "body": message_body,
@@ -121,8 +120,13 @@ def log_outbound_sms(event):
 
 def receive_inbound_sms(event, context):
     """Handle incoming events."""
-    print("called")
-    print(event)
+    print('INFO: Inbound SMS Call Received')
     event_body = json.loads(event['body'])
-    response = log_inbound_sms(event_body, forward=True)
-    return response
+    mdr = event_body['data']['id']
+
+    try:
+        INBOUND_TBL.get_item(Key={'id': mdr})['Item']['id']
+        print("ERROR: Duplicated call")
+    except KeyError:
+        response = log_inbound_sms(event_body, forward=True)
+        return response
