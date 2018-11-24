@@ -28,6 +28,7 @@ def log_inbound_sms(event, forward=True):
     message_body = event['data']['attributes']['body']
     timestamp = event['data']['attributes']['timestamp']
     direction = event['data']['attributes']['direction']
+    forward_mdr = "Not Sent"
 
     # update inbound item to dynamo
     log_item = {
@@ -37,6 +38,7 @@ def log_inbound_sms(event, forward=True):
         'body': message_body,
         'time': timestamp,
         'direction': direction,
+        'forward_mdr': forward_mdr
         }
     try:
         INBOUND_TBL.put_item(Item=log_item)
@@ -65,57 +67,29 @@ def log_inbound_sms(event, forward=True):
                                         headers=headers)
         time.sleep(3)
         forward_response = forward_message.json()
-        log_outbound_sms(forward_response)
+        log_outbound_sms(forward_response, mdr)
 
     return make_response(200, "SMS saved to Dynamo", detail=log_item)
 
 
-def log_outbound_dlr(event):
-    """Log outbound sms dlr."""
-    print("INFO: log forwarded dlr start")
-    mdr = event['data']['id']
-    from_number = event['data']['attributes']['from']
-    to_number = event['data']['attributes']['to']
-    message_body = event['data']['attributes']['body']
-    timestamp = event['data']['attributes']['timestamp']
-    direction = event['data']['attributes']['direction']
-
-    log_item = {
-        'id': mdr,
-        'from': from_number,
-        'to': to_number,
-        'body': message_body,
-        'time': timestamp,
-        'direction': direction,
-        }
-    try:
-        OUTBOUND_TBL.put_item(Item=log_item)
-    except Exception as e:
-        return make_response(500, 'Dynamo Error: {}'
-                             .format(e), detail=log_item)
-    return make_response(200, "SMS saved to Dynamo", detail=log_item)
-
-
-def log_outbound_sms(event):
+def log_outbound_sms(event, mdr):
     """Log outbound sms result."""
     print("INFO: log outbound sms start")
-    mdr = event['data']['id']
+    forward_mdr = event['data']['id']
 
-    # update outbound to dynamo
-    log_item = {
-        'id': mdr,
-        'from': config.FROM_NUMBER,
-        'direction': "forward",
-        # make it so that orig sender, orig to becomes column in db
-        # then rename outbound-sms to forward-sms
-        }
     try:
-        OUTBOUND_TBL.put_item(Item=log_item)
+        INBOUND_TBL.update_item(
+            Key={'id': mdr},
+            UpdateExpression="SET forward_mdr = :f",
+            ExpressionAttributeValues={':f': forward_mdr},
+            ReturnValues="UPDATED_NEW"
+        )
+
     except Exception as e:
         return make_response(500, 'Dynamo Error: {}'
-                             .format(e), detail=log_item)
+                             .format(e))
 
-    return make_response(200, "SMS saved to Dynamo", detail=log_item)
+    return make_response(200, "SMS saved to Dynamo")
 
 
 def receive_inbound_sms(event, context):
