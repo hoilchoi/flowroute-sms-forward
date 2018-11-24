@@ -27,7 +27,6 @@ def log_inbound_sms(event, forward=True):
     to_number = event['data']['attributes']['to']
     message_body = event['data']['attributes']['body']
     timestamp = event['data']['attributes']['timestamp']
-    direction = event['data']['attributes']['direction']
     forward_mdr = "Not Sent"
 
     # update inbound item to dynamo
@@ -37,7 +36,6 @@ def log_inbound_sms(event, forward=True):
         'to': to_number,
         'body': message_body,
         'time': timestamp,
-        'direction': direction,
         'forward_mdr': forward_mdr
         }
     try:
