@@ -7,8 +7,7 @@ import config
 
 
 MY_DYNAMODB = boto3.resource('dynamodb', region_name='us-west-2')
-INBOUND_TBL = MY_DYNAMODB.Table('inbound-sms')
-OUTBOUND_TBL = MY_DYNAMODB.Table('outbound-sms')
+INBOUND_TBL = MY_DYNAMODB.Table('forward-sms')
 
 
 def make_response(code, message, detail=None):
