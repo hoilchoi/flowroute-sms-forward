@@ -1,6 +1,7 @@
 import json
 import time
 import boto3
+from boto3.dynamodb.conditions import Key
 from botocore.vendored import requests
 import config
 
@@ -17,6 +18,29 @@ def make_response(code, message, detail=None):
         "message": message,
         "details": detail
         }
+
+
+def receive_inbound_sms(event, context):
+    """Handle incoming events."""
+    print('INFO: Inbound SMS Call Received')
+    is_duplicate = False
+
+    try:
+        event_body = json.loads(event['body'])
+    except TypeError:  # lambda test event
+        event_body = event['body']
+
+    called_mdr = event_body['data']['id']
+    called_mdr_count = INBOUND_TBL.query(KeyConditionExpression=Key('id')
+                                         .eq(called_mdr))['Count']
+
+    if called_mdr_count > 0:
+        is_duplicate = True
+
+    if is_duplicate:
+        print("ERROR: Duplicated call", called_mdr)
+    else:
+        log_inbound_sms(event_body, forward=True)
 
 
 def log_inbound_sms(event, forward=True):
@@ -44,15 +68,14 @@ def log_inbound_sms(event, forward=True):
         inbound_log_result = make_response(200,
                                            "Inbound SMS saved to Dynamo",
                                            detail=log_item)
+        print("INFO:", inbound_log_result)
+        if forward:
+            forward_sms(from_number, to_number, message_body, mdr)
     except Exception as e:
         inbound_log_result = make_response(500,
                                            'Dynamo Error during Inbound: {}'
                                            .format(e), detail=log_item)
-    print("LOG:", inbound_log_result)
-
-    # forward message
-    if forward:
-        forward_sms(from_number, to_number, message_body, mdr)
+        print("ERROR:", inbound_log_result)
 
 
 def forward_sms(from_number, to_number, message_body, mdr):
@@ -93,22 +116,9 @@ def log_outbound_sms(forward_response, mdr):
             ReturnValues="UPDATED_NEW"
         )
         forward_log_result = make_response(200, "Forward SMS saved to Dynamo")
+        print("INFO:", forward_log_result)
     except Exception as e:
         forward_log_result = make_response(500,
                                            'Dynamo Error during Forward: {}'
                                            .format(e))
-
-    print("LOG:", forward_log_result)
-
-
-def receive_inbound_sms(event, context):
-    """Handle incoming events."""
-    print('INFO: Inbound SMS Call Received')
-    event_body = json.loads(event['body'])
-    mdr = event_body['data']['id']
-
-    try:
-        INBOUND_TBL.get_item(Key={'id': mdr})['Item']['id']
-        print("ERROR: Duplicated call")
-    except KeyError:
-        log_inbound_sms(event_body, forward=True)
+        print("ERROR:", forward_log_result)
