@@ -11,7 +11,7 @@ provider:
       Action:
         - dynamoDB:*
       Resource:
-        - "arn:aws:dynamodb:us-west-2:977032200496:table/forward-sms"
+         - "Fn::GetAtt": [ ForwardTable, Arn ]
 functions:
   ReceiveInboundSMS:
     handler: handler.receive_inbound_sms
@@ -20,17 +20,17 @@ functions:
 
 resources:
   Resources:
-    TodosDynamoDbTable:
+    ForwardTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: id
+            AttributeName: inbound_mdr
             AttributeType: S
         KeySchema:
           -
-            AttributeName: id
+            AttributeName: inbound_mdr
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
