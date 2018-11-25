@@ -11,8 +11,7 @@ provider:
       Action:
         - dynamoDB:*
       Resource:
-        - "arn:aws:dynamodb:us-west-2:977032200496:table/inbound-sms"
-        - "arn:aws:dynamodb:us-west-2:977032200496:table/outbound-sms"
+        - "arn:aws:dynamodb:us-west-2:977032200496:table/forward-sms"
 functions:
   ReceiveInboundSMS:
     handler: handler.receive_inbound_sms
