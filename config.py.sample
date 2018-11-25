@@ -1,0 +1,5 @@
+SMS_URL = "https://api.flowroute.com/v2.1/messages"
+API_KEY = ""
+API_SECRET = ""
+FROM_NUMBER = ""
+FORWARD_NUMBER = ""
