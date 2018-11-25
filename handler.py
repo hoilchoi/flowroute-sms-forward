@@ -30,7 +30,7 @@ def receive_inbound_sms(event, context):
         event_body = event['body']
 
     called_mdr = event_body['data']['id']
-    called_mdr_count = INBOUND_TBL.query(KeyConditionExpression=Key('id')
+    called_mdr_count = INBOUND_TBL.query(KeyConditionExpression=Key('inbound_mdr')
                                          .eq(called_mdr))['Count']
 
     if called_mdr_count > 0:
@@ -55,7 +55,7 @@ def log_inbound_sms(event, forward=True):
 
     # update inbound item to dynamo
     log_item = {
-        'id': mdr,
+        'inbound_mdr': mdr,
         'from': from_number,
         'to': to_number,
         'body': message_body,
@@ -109,7 +109,7 @@ def log_outbound_sms(forward_response, mdr):
 
     try:
         INBOUND_TBL.update_item(
-            Key={'id': mdr},
+            Key={'inbound_mdr': mdr},
             UpdateExpression="SET forward_mdr = :f",
             ExpressionAttributeValues={':f': forward_mdr},
             ReturnValues="UPDATED_NEW"
