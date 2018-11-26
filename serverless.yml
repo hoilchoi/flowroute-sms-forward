@@ -1,6 +1,6 @@
 frameworkVersion: ">=1.0.0 <2.0.0"
 
-service: receive-inbound-sms
+service: forwardSMS
 provider:
   name: aws
   runtime: python3.6
@@ -16,7 +16,7 @@ functions:
   ReceiveInboundSMS:
     handler: handler.receive_inbound_sms
     events:
-      - http: POST receive_inbound_sms
+      - http: POST forwardsms
 
 resources:
   Resources:
