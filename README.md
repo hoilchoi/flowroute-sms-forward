@@ -119,4 +119,3 @@ $ vagrant up
 $ vagrant ssh -c "cd flowroute-sms-forward;sls info"
 $ vagrant ssh -c "cd flowroute-sms-forward;sls remove"
 ```
-and 
