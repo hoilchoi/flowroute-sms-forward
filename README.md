@@ -72,6 +72,8 @@ However, if preferred to use VM, vagrant can be used to create a quick app serve
 ```shell
 $ vagrant up
 ```
+Vagrant installaion can be found [here](https://www.vagrantup.com/docs/installation/).
+
 
 ### Using local machine
 
@@ -99,9 +101,22 @@ It will give API endpoint to use in your Flowroute account's PREFERENCE -> API C
 
 Add the endpoint to SMS callback.
 
-Now any SMS to your Flowroute DID will be forwarded to your `FORWARD_NUMBER = "11-DIGIT DESTINATION NUMBER"` added above.  
+Now any SMS to your Flowroute DID will be forwarded to your forward number in `config.py`.  
+
+
+## Vagrant
 
 Vagrant VM can be destroyed if you wish. 
 ```shell
 $ vagrant destroy
 ```
+VM is only used for deploying AWS service, so there's no reason for it to be running. 
+
+
+If you need to retrieve endpoint information or remove service from AWS, you can re-create the VM and send appropriate commands:
+```shell
+$ vagrant up
+$ vagrant ssh -c "cd flowroute-sms-forward;sls info"
+$ vagrant ssh -c "cd flowroute-sms-forward;sls remove"
+```
+and 
