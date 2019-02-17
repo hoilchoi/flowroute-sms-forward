@@ -1,6 +1,7 @@
-VAGRANTFILE_API_VERSION = "2"
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+Vagrant.configure(2) do |config|
     # general
     config.vm.box = "bento/ubuntu-16.04"
     config.ssh.insert_key = false
@@ -9,14 +10,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         v.linked_clone = true
     end
 
-    #app server config
+    # app server config
     config.vm.define "smsforward" do |app|
         app.vm.hostname = "smsforward.local"
         app.vm.network :private_network, ip: "192.168.99.99"
         app.vm.network :forwarded_port, host: 8001, guest: 8000
-        app.vm.synced_folder "flowroute-sms-forward", "/home/vagrant/flowroute-sms-forward", create: true
+        app.vm.synced_folder ".", "/home/vagrant/flowroute-sms-forward", create: true
+        app.vm.synced_folder "~/.aws/", "/home/vagrant/.aws", create: true
     end
 
+    # provisioner
     config.vm.provision :ansible do |ansible|
       ansible.playbook = "ansible/base.yml"
       ansible.become = true
