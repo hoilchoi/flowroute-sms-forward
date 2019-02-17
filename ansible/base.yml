@@ -9,7 +9,7 @@
 
   - name: add repo for nodesource
     apt_repository:
-      repo: deb https://deb.nodesource.com/node_11.x main
+      repo: deb https://deb.nodesource.com/node_11.x xenial main
       state: present
 
   - name: install packages
@@ -22,7 +22,7 @@
       name: serverless
       global: yes
 
-  - name: sls deploy
-  command: sls deploy
-  args:
-    chdir: /home/vagrant/flowroute-sms-forward
+  - name: sls info
+    command: sls info
+    args:
+      chdir: /home/vagrant/flowroute-sms-forward
